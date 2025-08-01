@@ -5,6 +5,9 @@ import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' as map;
 
+import '../../../core/api_service.dart';
+import '../../../data/models/place_result.dart';
+
 class PlaceSearchDelegate extends SearchDelegate<map.Point?> {
   final LatLng? currentLocation;
 
@@ -31,8 +34,8 @@ class PlaceSearchDelegate extends SearchDelegate<map.Point?> {
     if (query.length < 3) {
       return const Center(child: Text('Type at least 3 characters'));
     }
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: _searchPlaces(query),
+    return FutureBuilder<List<PlaceResult>>(
+      future: ApiService.searchPlaces(query),
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return const Center(child: CircularProgressIndicator());
@@ -46,10 +49,10 @@ class PlaceSearchDelegate extends SearchDelegate<map.Point?> {
           itemBuilder: (context, index) {
             final place = suggestions[index];
             return ListTile(
-              title: Text(place['display_name']),
+              title: Text(place.displayName),
               onTap: () {
-                final lat = double.parse(place['lat']);
-                final lon = double.parse(place['lon']);
+                final lat = place.lat;
+                final lon = place.lon;
                 final point = map.Point(coordinates: map.Position(lon, lat));
                 close(context, point);
               },
@@ -58,17 +61,5 @@ class PlaceSearchDelegate extends SearchDelegate<map.Point?> {
         );
       },
     );
-  }
-
-  Future<List<Map<String, dynamic>>> _searchPlaces(String term) async {
-    final uri = Uri.parse(
-      'https://nominatim.openstreetmap.org/search?q=$term'
-          '&format=json&limit=5&addressdetails=1&accept-language=en',
-    );
-    final response = await http.get(uri, headers: {'User-Agent': 'MapApp/1.0'});
-    if (response.statusCode != 200) return [];
-    final List results = json.decode(response.body);
-    // Optionally sort by distance to currentLocation if provided
-    return results.cast<Map<String, dynamic>>();
   }
 }
