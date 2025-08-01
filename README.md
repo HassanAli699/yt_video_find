@@ -16,13 +16,7 @@ A Flutter application that allows users to explore **YouTube videos around speci
 
 ---
 
-## 📸 Screenshots (optional)
-
-_Add your screenshots here if needed for UI previews._
-
----
-
-## 🚀 Getting Started
+### 🚀 Getting Started
 
 ### Prerequisites
 
